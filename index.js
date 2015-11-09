@@ -61,7 +61,6 @@ var clapDetector = (function() {
 
     /* Listen */
     function _listen() {
-        console.log("------ Listen for noise --------");
         // Listen for sound
         var cmd = 'sox -t alsa ' + CONFIG.AUDIO_SOURCE + ' ' + CONFIG.SOUND_FILE + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
         var child = exec(cmd);
@@ -99,7 +98,6 @@ var clapDetector = (function() {
          var regExMax = /Maximum[\s]+amplitude:[\s]+([0-9.]+)/;
          exec(cmd, function(error, out, stderr) {
              // Is this a clap of hand ?
-             console.log('debug', error, out, stderr);
              var durationData = out.match(regExDuration);
              var duration = parseFloat(durationData[1]);
              var rmsData = out.match(regExRms);
@@ -136,7 +134,9 @@ var clapDetector = (function() {
 
     return {
         start: function (props) {
-            _.assign(CONFIG, props);
+            if(props) {
+                _.assign(CONFIG, props);
+            }
             _listen();
         },
 

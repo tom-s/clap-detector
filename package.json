@@ -15,7 +15,9 @@
     "js",
     "clap",
     "detection",
-    "sox"
+    "sox",
+    "alsa",
+    "microphone"
   ],
   "author": "tom-s",
   "licenses": [
