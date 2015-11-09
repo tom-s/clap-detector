@@ -48,7 +48,7 @@ clapDetector.onClap(function() {
     //console.log('your callback code here ');
 }.bind(this));
 
-// Register to a serie of 3 claps occuring within 3 seconds
+// Register to a serie of 3 claps occuring within 2 seconds
 clapDetector.onClaps(3, 2000, function(delay) {
     //console.log('your callback code here ');
 }.bind(this));
