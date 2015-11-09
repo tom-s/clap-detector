@@ -93,7 +93,7 @@ var clapDetector = (function() {
         var deferred = Q.defer();
 
          // Check that file is a clap
-         var cmd = "sox " + SOUND_FILE_CLEAN + " -n stat 2>&1"; //| sed -n 's#^Length (seconds):[^0-9]*\\([0-9.]*\\)$#\\1#p'
+         var cmd = "sox " + CONFIG.SOUND_FILE_CLEAN + " -n stat 2>&1"; //| sed -n 's#^Length (seconds):[^0-9]*\\([0-9.]*\\)$#\\1#p'
          var regExDuration = /Length[\s]+\(seconds\):[\s]+([0-9.]+)/;
          var regExRms = /RMS[\s]+amplitude:[\s]+([0-9.]+)/;
          var regExMax = /Maximum[\s]+amplitude:[\s]+([0-9.]+)/;
