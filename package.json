@@ -1,0 +1,26 @@
+{
+  "name": "clap-detector",
+  "version": "1.0.0",
+  "description": "Clap detection for node js (linux, raspberry systems)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tom-s/clapDetector.git"
+  },
+  "keywords": [
+    "node",
+    "js",
+    "clap",
+    "detection",
+    "sox"
+  ],
+  "author": "tom-s",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tom-s/clapDetector/issues"
+  },
+  "homepage": "https://github.com/tom-s/clapDetector#readme"
+}
