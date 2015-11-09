@@ -1,6 +1,6 @@
 {
   "name": "clap-detector",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Clap detection for node js (linux, raspberry systems)",
   "main": "index.js",
   "scripts": {
@@ -31,5 +31,9 @@
   "bugs": {
     "url": "https://github.com/tom-s/clapDetector/issues"
   },
-  "homepage": "https://github.com/tom-s/clapDetector#readme"
+  "homepage": "https://github.com/tom-s/clapDetector#readme",
+  "dependencies": {
+    "lodash": "^3.10.1",
+    "q": "^1.4.1"
+  }
 }
