@@ -146,9 +146,9 @@ var clapDetector = (function() {
 
     function  _cleanFile() {
         var deferred = Q.defer();
-        if(CONFIG.PERFORM) {
+        if(CONFIG.CLEANING.PERFORM) {
             // Clean noise
-            var cmd = 'sox ' + CONFIG.SOUND_FILE + ' ' + CONFIG.SOUND_FILE_CLEAN + ' noisered ' + CONFIG.NOISE_PROFILE + ' 0.21';
+            var cmd = 'sox ' + CONFIG.SOUND_FILE + ' ' + CONFIG.SOUND_FILE_CLEAN + ' noisered ' + CONFIG.CLEANING.NOISE_PROFILE + ' 0.21';
             exec(cmd, function() {
                 deferred.resolve();
             });
