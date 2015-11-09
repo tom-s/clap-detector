@@ -3,7 +3,7 @@ Clap detection module for node js
 
 ## Synopsis
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the project is. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
+ClapDetector is a hand clap detection module for nodejs (iojs). I detect a clap or a series of claps and allow you to trigger callbacks whenever these events happen.
 I created this module for my project of personal assistant on Raspberry Pi (raspbian). The clap detection allows me to activate the assistant whenever I need it (and prevent it from continuously being listening for instructions or interpreting random noises as instructions)
 
 ## Requirements
@@ -59,8 +59,8 @@ clapDetector.onClaps(3, 2000, function(delay) {
 You can pass a configuration object at initialisation time (clapDetector.init(yourConfObject)). If you don't the following config will be used. You should at least provide the audio input (if different from the default config).
 
 ```bash
-/* DEFAULT CONFIG */
-    var CONFIG = {
+// DEFAULT CONFIG
+var CONFIG = {
         AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. if you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
         DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
         DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
