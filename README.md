@@ -3,11 +3,11 @@ Clap detection module for node js
 
 ## Synopsis
 
-ClapDetector is a hand clap detection module for nodejs (iojs). I detect a clap or a series of claps and allow you to trigger callbacks whenever these events happen.
-I created this module for my project of personal assistant on Raspberry Pi (raspbian). The clap detection allows me to activate the assistant whenever I need it (and prevent it from continuously being listening for instructions or interpreting random noises as instructions)
+ClapDetector is a hand clap detection module for nodejs (iojs). It detects a clap or a series of claps and allows you to trigger callbacks whenever these events happen.
+I created this module for my personal assistant project on a Raspberry Pi (raspbian). The clap detection allows me to activate the assistant whenever I need it (and prevents it from continuously listening out for instructions or interpreting random noises as instructions)
 
 ## Requirements
-This module works on a linux based OS (raspbian, Ubuntu, Debian...) using alsa for audio and having a working microphone.
+This module works on a linux based OS (raspbian, Ubuntu, Debian...)  using alsa for audio and a working microphone.
 
 ## Installation
 
@@ -29,7 +29,7 @@ There are thee public methods you can use:
 - clapDetector.onClap(yourcallbackfunctionhere)
 => register a callback that will be triggered whenever a clap of hand is detected
 - clapDetector.onClaps(numberOfClaps, delay, yourcallbackfunctionhere)
-=> register a callback that will be triggered whenever a serie of claps (determined by the number of claps) is detected within the period of time you've specified (delay).
+=> register a callback that will be triggered whenever a series of claps (determined by the number of claps) is detected within the period of time you've specified (delay).
 
 ```bash
 // Require the module
@@ -56,12 +56,12 @@ clapDetector.onClaps(3, 2000, function(delay) {
 
 ## Configuration
 
-You can pass a configuration object at initialisation time (clapDetector.init(yourConfObject)). If you don't the following config will be used. You should at least provide the audio input (if different from the default config).
+You can pass a configuration object at the initialisation time (clapDetector.init(yourConfObject)). If you don't the following config will be used. You should at least provide the audio input (if different from the default config).
 
 ```bash
 // DEFAULT CONFIG
 var CONFIG = {
-        AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. if you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
+        AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
         DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
         DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
         CLEANING: {
@@ -77,7 +77,7 @@ var CONFIG = {
 ```
 
 If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.
-You can also activate cleaning (CLEANING.perform) of the noise for better results. In order to do that record a wav file (using your microphone) without talking and then generate the sox profile with the command:
+You can also activate noise cleaning (CLEANING.perform) for better results. In order to do that, record a wav file (using your microphone) without talking and then generate the sox profile with the command:
 
 ```bash
 sox -c 1 SILENCE.WAV -n trim 0 2 noiseprof noise.prof
