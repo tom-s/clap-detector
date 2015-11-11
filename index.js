@@ -34,7 +34,7 @@ var fs = require('fs');
 var clapDetector = (function() {
     /* DEFAULT CONFIG */
     var CONFIG = {
-        AUDIO_SOURCE: 'hw:1,0',
+        AUDIO_SOURCE: 'hw:1,0', // microphone
         DETECTION_PERCENTAGE_START : '10%',
         DETECTION_PERCENTAGE_END: '10%',
         CLEANING: {
@@ -94,8 +94,7 @@ var clapDetector = (function() {
 
         // Listen for sound
         var cmd = 'sox -t alsa ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
-        var child = exec(cmd);
-        child.on('close', function() {
+        var child = exec(cmd, function(err, stdout, sterr) {
             if(paused) {
                 return;
             }
