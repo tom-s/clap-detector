@@ -185,6 +185,16 @@ var clapDetector = (function() {
                 });
             }
 
+        },
+
+        // pause
+        pause: function() {
+            paused = true;
+        },
+
+        // resume
+        resume: function() {
+            paused = false;
         }
     };
 })();
