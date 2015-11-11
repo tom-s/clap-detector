@@ -68,8 +68,6 @@ var CONFIG = {
             PERFORM: false, // set to true if you want to clean the file from noise before analyzing it. It requires a sox noise profile
             NOISE_PROFILE: 'noise.prof' // path to the sox noise profile
         },
-        SOUND_FILE : "input.wav", // name of wav file created while recording
-        SOUND_FILE_CLEAN  : "input-clean.wav", // name of cleaned (if you activated cleaning) file
         CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
         CLAP_ENERGY_THRESHOLD: 0.3,  // minimum energy threshold to be considered as clap
         MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
