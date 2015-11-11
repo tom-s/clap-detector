@@ -114,8 +114,11 @@ var clapDetector = (function() {
                         }
                         _handleMultipleClaps();
                     }
-                    // remove file
+                    // remove file(s)
                     fs.unlink(filename);
+                    if(filename !== newFilename) {
+                        fs.unlink(newFilename);
+                    }
                 });
             });
 
