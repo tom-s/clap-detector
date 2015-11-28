@@ -4,7 +4,7 @@
 
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
+ of this software and associated documentation files (the "Software"), to dealFWAV_
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
@@ -30,6 +30,7 @@ var _ = require('lodash');
 var Q = require('q');
 var exec = require('child_process').exec;
 var fs = require('fs');
+var appRoot = require('app-root-path');
 
 var clapDetector = (function() {
     /* DEFAULT CONFIG */
@@ -44,7 +45,8 @@ var clapDetector = (function() {
         CLAP_AMPLITUDE_THRESHOLD: 0.7,
         CLAP_ENERGY_THRESHOLD: 0.3,
         CLAP_MAX_DURATION: 1500,
-        MAX_HISTORY_LENGTH: 10 // no need to maintain big history
+        MAX_HISTORY_LENGTH: 10, // no need to maintain big history
+        WAV_FOLDER: 'wav'
     };
 
     var paused = false;
@@ -90,7 +92,7 @@ var clapDetector = (function() {
     /* Listen */
     function _listen() {
         var random = _.random(0,99999);
-        var filename = 'input' + random + '.wav';
+        var filename = appRoot + '/' + CONFIG.WAV_FOLDER + '/input' + random + '.wav';
 
         // Listen for sound
         var cmd = 'sox -t alsa ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
@@ -114,14 +116,16 @@ var clapDetector = (function() {
                         _handleMultipleClaps();
                     }
                     // remove file(s)
-                    fs.unlink(filename);
+                    fs.unlinkSync(filename);
                     if(filename !== newFilename) {
-                        fs.unlink(newFilename);
+                        fs.unlinkSync(newFilename);
                     }
                 });
             });
 
         });
+
+        //child.umask(0000);
     }
 
     function _isClap(filename) {
@@ -130,9 +134,9 @@ var clapDetector = (function() {
 
         // Check that file is a clap
         var cmd = "sox " + filename + " -n stat 2>&1"; //| sed -n 's#^Length (seconds):[^0-9]*\\([0-9.]*\\)$#\\1#p'
-        var regExDuration = /Length[\s]+\(seconds\):[\s]+([0-9.]+)/;
-        var regExRms = /RMS[\s]+amplitude:[\s]+([0-9.]+)/;
-        var regExMax = /Maximum[\s]+amplitude:[\s]+([0-9.]+)/;
+        var regExDuration = /Length[\s]+\(seconds\):[\s]+(-*[0-9.]+)/;
+        var regExRms = /RMS[\s]+amplitude:[\s]+(-*[0-9.]+)/;
+        var regExMax = /Maximum[\s]+amplitude:[\s]+(-*[0-9.]+)/;
         exec(cmd, function(error, out, stderr) {
             if(error) {
                 deferred.resolve(false);
@@ -173,12 +177,42 @@ var clapDetector = (function() {
         return deferred.promise;
     }
 
+    function _prepareAudioFolder() {
+        // Create folder for audio files
+        var folder = appRoot + '/' + CONFIG.WAV_FOLDER;
+        if (!fs.existsSync(folder)){
+            fs.mkdirSync(folder, 0777);
+        }
+
+        // Delete all files in folder
+        try { var files = fs.readdirSync(folder); }
+        catch(e) { return; }
+
+        if (files.length > 0) {
+            _.forEach(files, function(file) {
+                var filePath = folder + '/' + file;
+                fs.unlinkSync(filePath, function(err, out) {
+                    console.log("error deleting file", filePath, err, out);
+                });
+            });
+        }
+    }
+
     return {
         start: function (props) {
             if(props) {
                 _.assign(CONFIG, props);
             }
-            _listen();
+            // Set up umask for files creation
+            process.umask(0000);
+
+            // Prepare audio folder
+            _prepareAudioFolder();
+
+            // Start listening
+            setTimeout(function() {
+                _listen();
+            }.bind(this), 2000);
         },
 
         //1 clap
