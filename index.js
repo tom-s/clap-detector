@@ -210,9 +210,7 @@ var clapDetector = (function() {
             _prepareAudioFolder();
 
             // Start listening
-            setTimeout(function() {
-                _listen();
-            }.bind(this), 2000);
+            _listen();
         },
 
         //1 clap
