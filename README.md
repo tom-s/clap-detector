@@ -7,7 +7,7 @@ ClapDetector is a hand clap detection module for nodejs (iojs). It detects a cla
 I created this module for my personal assistant project on a Raspberry Pi (raspbian). The clap detection allows me to activate the assistant whenever I need it (and prevents it from continuously listening out for instructions or interpreting random noises as instructions)
 
 ## Requirements
-This module works on a linux based OS (raspbian, Ubuntu, Debian...)  using alsa for audio and a working microphone.
+This module works on linux based OS (raspbian, Ubuntu, Debian...) using alsa for audio and a working microphone or Mac OS X using coreaudio.
 
 ## Installation
 
