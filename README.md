@@ -12,9 +12,16 @@ This module works on a linux based OS (raspbian, Ubuntu, Debian...)  using alsa 
 ## Installation
 
 This module requires sox, "the Swiss Army knife of sound processing programs" (http://sox.sourceforge.net/) to be installed
+### Linux
 ```bash
 sudo apt-get install sox
 ```
+### Mac OS X
+```bash
+brew install sox
+```
+
+### npm install
 You can simply add this module to your node.js project with
 ```bash
 // sudo might be required depending on your system
@@ -37,7 +44,7 @@ var clapDetector = require('clap-detector');
 
 // Define configuration
 var clapConfig = {
-   AUDIO_SOURCE: 'hw:1,0'
+   AUDIO_SOURCE: 'alsa hw:1,0'// default for linux
 };
 
 // Start clap detection
