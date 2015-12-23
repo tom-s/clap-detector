@@ -31,11 +31,14 @@ var Q = require('q');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var appRoot = require('app-root-path');
+var os = require('os');
 
 var clapDetector = (function() {
     /* DEFAULT CONFIG */
     var CONFIG = {
-        AUDIO_SOURCE: 'hw:1,0', // microphone
+        AUDIO_SOURCE: os.type() === "Darwin" // microphone
+        ? 'coreaudio default'
+        : 'alsa hw:1,0',
         DETECTION_PERCENTAGE_START : '10%',
         DETECTION_PERCENTAGE_END: '10%',
         CLEANING: {
@@ -95,7 +98,7 @@ var clapDetector = (function() {
         var filename = appRoot + '/' + CONFIG.WAV_FOLDER + '/input' + random + '.wav';
 
         // Listen for sound
-        var cmd = 'sox -t alsa ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
+        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
         var child = exec(cmd, function(err, stdout, sterr) {
             if(paused) {
                 return;
