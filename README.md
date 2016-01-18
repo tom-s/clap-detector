@@ -72,7 +72,7 @@ var CONFIG = {
         DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
         DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
         CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
-        CLAP_ENERGY_THRESHOLD: 0.3,  // minimum energy threshold to be considered as clap
+        CLAP_ENERGY_THRESHOLD: 0.3,  // maximum energy threshold to be considered as clap
         MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
     };
 ```

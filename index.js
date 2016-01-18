@@ -129,7 +129,6 @@ var clapDetector = (function() {
         rms      = stats['RMS amplitude'],
         max      = stats['Maximum amplitude'];
 
-
         return (duration < CONFIG.CLAP_MAX_DURATION && max > CONFIG.CLAP_AMPLITUDE_THRESHOLD && rms < CONFIG.CLAP_ENERGY_THRESHOLD);
     }
 
