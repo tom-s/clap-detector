@@ -71,10 +71,6 @@ var CONFIG = {
         AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
         DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
         DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
-        CLEANING: {
-            PERFORM: false, // set to true if you want to clean the file from noise before analyzing it. It requires a sox noise profile
-            NOISE_PROFILE: 'noise.prof' // path to the sox noise profile
-        },
         CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
         CLAP_ENERGY_THRESHOLD: 0.3,  // minimum energy threshold to be considered as clap
         MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
@@ -82,7 +78,6 @@ var CONFIG = {
 ```
 
 If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.
-You can also activate noise cleaning (CLEANING.perform) for better results. In order to do that, record a wav file (using your microphone) without talking and then generate the sox profile with the command:
 
 ```bash
 sox -c 1 SILENCE.WAV -n trim 0 2 noiseprof noise.prof

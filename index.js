@@ -28,7 +28,6 @@
 
 var _ = require('lodash');
 var Q = require('q');
-var spawn  = require('child_process').spawn;
 var exec = require('child_process').exec;
 var fs = require('fs');
 var appRoot = require('app-root-path');
@@ -45,8 +44,7 @@ var clapDetector = (function() {
         CLAP_AMPLITUDE_THRESHOLD: 0.7,
         CLAP_ENERGY_THRESHOLD: 0.3,
         CLAP_MAX_DURATION: 1500,
-        MAX_HISTORY_LENGTH: 10, // no need to maintain big history
-        WAV_FOLDER: 'wav'
+        MAX_HISTORY_LENGTH: 10 // no need to maintain big history
     };
 
     var paused = false;
@@ -94,27 +92,22 @@ var clapDetector = (function() {
         var args = [];
         var body  = '';
 
-        args.push("-t", "waveaudio", "-d");
-        args.push("-t",  "wav", "-n");
-        args.push("--no-show-progress");
-        args.push("silence", "1", "0.0001", CONFIG.DETECTION_PERCENTAGE_START, "1", "0.1", CONFIG.DETECTION_PERCENTAGE_END);
-        args.push("stat");
+        var filename = appRoot + '/input.wav';
 
-        console.log('args', args);
-        var child = spawn("sox", args);
+        // Listen for sound
+        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END + ' −−no−show−progress stat';
+       
+        var child = exec(cmd);
 
         child.stderr.on("data", function(buf){ 
-            console.log("buf", buf);
             body += buf; 
         });
-        
-        child.on("exit", function() {
-             _listen(); // listen again
 
-            console.log("body", body);
+        child.on("exit", function() {
+            
             var stats = _parse(body);
-            console.log("stats", stats);
             if(_isClap(stats)) {
+
                 clapsHistory.push({
                     time: new Date().getTime()
                 });
@@ -125,14 +118,17 @@ var clapDetector = (function() {
                 _handleMultipleClaps();
             }
 
+             _listen(); // listen again
 
         });
     }
 
     function _isClap(stats) {
-        var duration = stats['Length (seconds)'];
-        var rms      = stats['RMS amplitude'];
-        var max      = stats['Maximum amplitude'];
+
+        var duration = stats['Length (seconds)'],
+        rms      = stats['RMS amplitude'],
+        max      = stats['Maximum amplitude'];
+
 
         return (duration < CONFIG.CLAP_MAX_DURATION && max > CONFIG.CLAP_AMPLITUDE_THRESHOLD && rms < CONFIG.CLAP_ENERGY_THRESHOLD);
     }
@@ -187,16 +183,3 @@ var clapDetector = (function() {
 })();
 
 module.exports = clapDetector;
-
-// Define configuration
-var clapConfig = {
-   AUDIO_SOURCE: 'alsa hw:1,0'// default for linux
-};
-
-// Start clap detection
-clapDetector.start(clapConfig);
-
-// Register on clap event
-clapDetector.onClap(function() {
-    //console.log('your callback code here ');
-}.bind(this));

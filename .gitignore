@@ -1,4 +1,4 @@
 .gitignore
 node_modules
-wav
+input.wav
 .idea
