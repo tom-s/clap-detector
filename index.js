@@ -28,6 +28,7 @@
 
 var _ = require('lodash');
 var Q = require('q');
+var spawn  = require('child_process').spawn;
 var exec = require('child_process').exec;
 var fs = require('fs');
 var appRoot = require('app-root-path');
@@ -41,10 +42,6 @@ var clapDetector = (function() {
         : 'alsa hw:1,0',
         DETECTION_PERCENTAGE_START : '10%',
         DETECTION_PERCENTAGE_END: '10%',
-        CLEANING: {
-            PERFORM: false, // requires a noise profile
-            NOISE_PROFILE: 'noise.prof'
-        },
         CLAP_AMPLITUDE_THRESHOLD: 0.7,
         CLAP_ENERGY_THRESHOLD: 0.3,
         CLAP_MAX_DURATION: 1500,
@@ -94,123 +91,65 @@ var clapDetector = (function() {
 
     /* Listen */
     function _listen() {
-        var random = _.random(0,99999);
-        var filename = appRoot + '/' + CONFIG.WAV_FOLDER + '/input' + random + '.wav';
+        var args = [];
+        var body  = '';
 
-        // Listen for sound
-        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END;
-        var child = exec(cmd, function(err, stdout, sterr) {
-            if(paused) {
-                return;
-            }
+        args.push("-t", "waveaudio", "-d");
+        args.push("-t",  "wav", "-n");
+        args.push("--no-show-progress");
+        args.push("silence", "1", "0.0001", CONFIG.DETECTION_PERCENTAGE_START, "1", "0.1", CONFIG.DETECTION_PERCENTAGE_END);
+        args.push("stat");
 
-            _listen(); // listen again
+        console.log('args', args);
+        var child = spawn("sox", args);
 
-            // Clean and check file and take action
-            _cleanFile(filename).then(function(newFilename) {
-                _isClap(newFilename).then(function(isClap) {
-                    if(isClap) {
-                        clapsHistory.push({
-                            time: new Date().getTime()
-                        });
-                        if(EVENTS.clap.fn) {
-                            EVENTS.clap.fn();
-                        }
-                        _handleMultipleClaps();
-                    }
-                    // remove file(s)
-                    fs.unlinkSync(filename);
-                    if(filename !== newFilename) {
-                        fs.unlinkSync(newFilename);
-                    }
-                });
-            });
-
+        child.stderr.on("data", function(buf){ 
+            console.log("buf", buf);
+            body += buf; 
         });
+        
+        child.on("exit", function() {
+             _listen(); // listen again
 
-        //child.umask(0000);
-    }
-
-    function _isClap(filename) {
-
-        var deferred = Q.defer();
-
-        // Check that file is a clap
-        var cmd = "sox " + filename + " -n stat 2>&1"; //| sed -n 's#^Length (seconds):[^0-9]*\\([0-9.]*\\)$#\\1#p'
-        var regExDuration = /Length[\s]+\(seconds\):[\s]+(-*[0-9.]+)/;
-        var regExRms = /RMS[\s]+amplitude:[\s]+(-*[0-9.]+)/;
-        var regExMax = /Maximum[\s]+amplitude:[\s]+(-*[0-9.]+)/;
-        exec(cmd, function(error, out, stderr) {
-            if(error) {
-                deferred.resolve(false);
-            } else {
-                // Is this a clap of hand ?
-                var durationData = out.match(regExDuration);
-                var duration = parseFloat(durationData[1]);
-                var rmsData = out.match(regExRms);
-                var rms = parseFloat(rmsData[1]);
-                var maxData = out.match(regExMax);
-                var max = parseFloat(maxData[1]);
-
-                // Does it have the characteristics of a clap
-                if(duration < CONFIG.CLAP_MAX_DURATION/1000 && max > CONFIG.CLAP_AMPLITUDE_THRESHOLD && rms < CONFIG.CLAP_ENERGY_THRESHOLD){
-                    deferred.resolve(true);
-                } else {
-                    deferred.resolve(false);
+            console.log("body", body);
+            var stats = _parse(body);
+            console.log("stats", stats);
+            if(_isClap(stats)) {
+                clapsHistory.push({
+                    time: new Date().getTime()
+                });
+                
+                if(EVENTS.clap.fn) {
+                    EVENTS.clap.fn();
                 }
+                _handleMultipleClaps();
             }
+
+
         });
-
-        return deferred.promise;
     }
 
-    function  _cleanFile(filename) {
-        var deferred = Q.defer();
-        if(CONFIG.CLEANING.PERFORM) {
-            // Clean noise
-            var cmd = 'sox ' + filename + ' ' + 'clean-' + filename + ' noisered ' + CONFIG.CLEANING.NOISE_PROFILE + ' 0.21';
-            exec(cmd, function() {
-                deferred.resolve('clean-' + filename);
-            });
-        } else {
-            // No cleaning to do
-            deferred.resolve(filename);
-        }
+    function _isClap(stats) {
+        var duration = stats['Length (seconds)'];
+        var rms      = stats['RMS amplitude'];
+        var max      = stats['Maximum amplitude'];
 
-        return deferred.promise;
+        return (duration < CONFIG.CLAP_MAX_DURATION && max > CONFIG.CLAP_AMPLITUDE_THRESHOLD && rms < CONFIG.CLAP_ENERGY_THRESHOLD);
     }
 
-    function _prepareAudioFolder() {
-        // Create folder for audio files
-        var folder = appRoot + '/' + CONFIG.WAV_FOLDER;
-        if (!fs.existsSync(folder)){
-            fs.mkdirSync(folder, 0777);
-        }
-
-        // Delete all files in folder
-        try { var files = fs.readdirSync(folder); }
-        catch(e) { return; }
-
-        if (files.length > 0) {
-            _.forEach(files, function(file) {
-                var filePath = folder + '/' + file;
-                fs.unlinkSync(filePath, function(err, out) {
-                    console.log("error deleting file", filePath, err, out);
-                });
-            });
-        }
+    function _parse(body) {
+        body = body.replace(new RegExp("[ \\t]+", "g") , " "); //sox use spaces to align output
+        var split = new RegExp("^(.*):\\s*(.*)$", "mg"), match, dict = {}; //simple key:value
+        while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2]);
+        return dict;
     }
+
 
     return {
         start: function (props) {
             if(props) {
                 _.assign(CONFIG, props);
             }
-            // Set up umask for files creation
-            process.umask(0000);
-
-            // Prepare audio folder
-            _prepareAudioFolder();
 
             // Start listening
             _listen();
@@ -248,3 +187,16 @@ var clapDetector = (function() {
 })();
 
 module.exports = clapDetector;
+
+// Define configuration
+var clapConfig = {
+   AUDIO_SOURCE: 'alsa hw:1,0'// default for linux
+};
+
+// Start clap detection
+clapDetector.start(clapConfig);
+
+// Register on clap event
+clapDetector.onClap(function() {
+    //console.log('your callback code here ');
+}.bind(this));
