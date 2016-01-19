@@ -79,10 +79,6 @@ var CONFIG = {
 
 If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.
 
-```bash
-sox -c 1 SILENCE.WAV -n trim 0 2 noiseprof noise.prof
-```
-
 ## Tests
 
 These will be added soon. Please do not hesitate to add some !
