@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Clap-detector by tom-s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Clap-detector</h1>
+      <h2 class="project-tagline">Clap detection module  for node js</h2>
+      <a href="https://github.com/tom-s/clap-detector" class="btn">View on GitHub</a>
+      <a href="https://github.com/tom-s/clap-detector/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/tom-s/clap-detector/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="synopsis" class="anchor" href="#synopsis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Synopsis</h2>
+
+<p>ClapDetector is a hand clap detection module for nodejs (iojs). It detects a clap or a series of claps and allows you to trigger callbacks whenever these events happen.
+I created this module for my personal assistant project on a Raspberry Pi (raspbian). The clap detection allows me to activate the assistant whenever I need it (and prevents it from continuously listening out for instructions or interpreting random noises as instructions)</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>This module works on linux based OS (raspbian, Ubuntu, Debian...) using alsa for audio and a working microphone or Mac OS X using coreaudio.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>This module requires sox, "the Swiss Army knife of sound processing programs" (<a href="http://sox.sourceforge.net/">http://sox.sourceforge.net/</a>) to be installed</p>
+
+<h3>
+<a id="linux" class="anchor" href="#linux" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Linux</h3>
+
+<div class="highlight highlight-source-shell"><pre>sudo apt-get install sox</pre></div>
+
+<h3>
+<a id="mac-os-x" class="anchor" href="#mac-os-x" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Mac OS X</h3>
+
+<div class="highlight highlight-source-shell"><pre>brew install sox</pre></div>
+
+<h3>
+<a id="npm-install" class="anchor" href="#npm-install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>npm install</h3>
+
+<p>You can simply add this module to your node.js project with</p>
+
+<div class="highlight highlight-source-shell"><pre>// sudo might be required depending on your system
+npm install --save clap-detector</pre></div>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>There are thee public methods you can use:</p>
+
+<ul>
+<li>clapDetector.start(clapConfig);
+=&gt; this needs to be called to initialize clap detection. The clapConfig object is not mandatory but you can use it to overwrite the default configuration (see next section)</li>
+<li>clapDetector.onClap(yourcallbackfunctionhere)
+=&gt; register a callback that will be triggered whenever a clap of hand is detected</li>
+<li>clapDetector.onClaps(numberOfClaps, delay, yourcallbackfunctionhere)
+=&gt; register a callback that will be triggered whenever a series of claps (determined by the number of claps) is detected within the period of time you've specified (delay).</li>
+</ul>
+
+<div class="highlight highlight-source-shell"><pre>// Require the module
+var clapDetector = require(<span class="pl-s"><span class="pl-pds">'</span>clap-detector<span class="pl-pds">'</span></span>)<span class="pl-k">;</span>
+
+// Define configuration
+var clapConfig = {
+   AUDIO_SOURCE: <span class="pl-s"><span class="pl-pds">'</span>alsa hw:1,0<span class="pl-pds">'</span></span>// default <span class="pl-k">for</span> linux
+}<span class="pl-k">;</span>
+
+// Start clap detection
+clapDetector.start(clapConfig)<span class="pl-k">;</span>
+
+// Register on clap event
+<span class="pl-en">clapDetector.onClap(function</span>() {
+    //console.log(<span class="pl-s"><span class="pl-pds">'</span>your callback code here <span class="pl-pds">'</span></span>)<span class="pl-k">;</span>
+});
+
+// Register to a serie of 3 claps occuring within 2 seconds
+clapDetector.onClaps(3, 2000, function(delay) {
+    //console.log(<span class="pl-s"><span class="pl-pds">'</span>your callback code here <span class="pl-pds">'</span></span>)<span class="pl-k">;</span>
+})<span class="pl-k">;</span></pre></div>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>You can pass a configuration object at the initialisation time (clapDetector.init(yourConfObject)). If you don't the following config will be used. You should at least provide the audio input (if different from the default config).</p>
+
+<div class="highlight highlight-source-shell"><pre>// DEFAULT CONFIG
+var CONFIG = {
+        AUDIO_SOURCE: <span class="pl-s"><span class="pl-pds">'</span>hw:1,0<span class="pl-pds">'</span></span>, // this is your microphone input. If you don<span class="pl-s"><span class="pl-pds">'</span>t know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)</span>
+<span class="pl-s">        DETECTION_PERCENTAGE_START : <span class="pl-pds">'</span></span>5%<span class="pl-s"><span class="pl-pds">'</span>, // minimum noise percentage threshold necessary to start recording sound</span>
+<span class="pl-s">        DETECTION_PERCENTAGE_END: <span class="pl-pds">'</span></span>5%<span class="pl-s"><span class="pl-pds">'</span>,  // minimum noise percentage threshold necessary to stop recording sound</span>
+<span class="pl-s">        CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap</span>
+<span class="pl-s">        CLAP_ENERGY_THRESHOLD: 0.3,  // maximum energy threshold to be considered as clap</span>
+<span class="pl-s">        MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length</span>
+<span class="pl-s">    };</span></pre></div>
+
+<p>If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.</p>
+
+<h2>
+<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h2>
+
+<p>These will be added soon. Please do not hesitate to add some !</p>
+
+<h2>
+<a id="about-the-author" class="anchor" href="#about-the-author" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About the Author</h2>
+
+<p>I am a full-stack Javascript developer based in Lyon, France.</p>
+
+<p><a href="http://www.thomschell.com">Check out my website</a></p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>clap-detector is dual licensed under the MIT license and GPL.
+For more information click <a href="https://opensource.org/licenses/MIT">here</a>.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/tom-s/clap-detector">Clap-detector</a> is maintained by <a href="https://github.com/tom-s">tom-s</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-69967910-3");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
