@@ -109,6 +109,7 @@ var clapDetector = (function() {
             if(_isClap(stats)) {
 
                 clapsHistory.push({
+                    id  : (clapsHistory.length) ? _.last(clapsHistory, 1).id + 1 : 1,
                     time: new Date().getTime()
                 });
                 
