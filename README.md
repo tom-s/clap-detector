@@ -37,6 +37,8 @@ There are thee public methods you can use:
 => register a callback that will be triggered whenever a clap of hand is detected
 - clapDetector.onClaps(numberOfClaps, delay, yourcallbackfunctionhere)
 => register a callback that will be triggered whenever a series of claps (determined by the number of claps) is detected within the period of time you've specified (delay).
+- clapDetector.updateConfig(clapConfig);
+=> updates configuration on-the-fly.
 
 ```bash
 // Require the module
