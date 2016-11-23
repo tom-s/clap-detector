@@ -113,7 +113,7 @@ var clapDetector = (function() {
                 });
                 
                 if(EVENTS.clap.fn) {
-                    EVENTS.clap.fn();
+                    EVENTS.clap.fn(clapsHistory);
                 }
                 _handleMultipleClaps();
             }
