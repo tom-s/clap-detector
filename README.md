@@ -51,14 +51,17 @@ var clapConfig = {
 clapDetector.start(clapConfig);
 
 // Register on clap event
-clapDetector.onClap(function() {
-    //console.log('your callback code here ');
+clapDetector.onClap(function(history) {
+    //console.log('your callback code here ', history);
 });
 
 // Register to a serie of 3 claps occuring within 2 seconds
 clapDetector.onClaps(3, 2000, function(delay) {
     //console.log('your callback code here ');
 });
+
+// Update the configuration
+clapDetector.updateConfig(clapConfig);
 ```
 
 ## Configuration
