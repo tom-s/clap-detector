@@ -139,12 +139,15 @@ var clapDetector = (function() {
         return dict;
     }
 
+    function _config(props) {
+        if(props) {
+            _.assign(CONFIG, props);
+        }
+    }
 
     return {
         start: function (props) {
-            if(props) {
-                _.assign(CONFIG, props);
-            }
+            _config(props);
 
             // Start listening
             _listen();
@@ -177,6 +180,11 @@ var clapDetector = (function() {
         // resume
         resume: function() {
             paused = false;
+        },
+
+        // updateConfig
+        updateConfig: function(props) {
+            _config(props);
         }
     };
 })();
