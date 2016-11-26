@@ -76,9 +76,6 @@ var clapDetector = (function() {
 
     /* Check if multiple claps have been done */
     function _handleMultipleClaps() {
-        // Clean history
-        clapsHistory = _.takeRight(clapsHistory, CONFIG.MAX_HISTORY_LENGTH); // no need to maintain a big history
-
         // If callback registered, handle them
         if(EVENTS.multipleClaps.length > 0) {
             _.forEach(EVENTS.multipleClaps,  function(cbProps) {
@@ -112,7 +109,10 @@ var clapDetector = (function() {
                     id  : (clapsHistory.length) ? _.last(clapsHistory, 1).id + 1 : 1,
                     time: new Date().getTime()
                 });
-                
+
+                // Clean history
+                clapsHistory = _.takeRight(clapsHistory, CONFIG.MAX_HISTORY_LENGTH); // no need to maintain a big history
+
                 if(EVENTS.clap.fn) {
                     EVENTS.clap.fn(clapsHistory);
                 }
