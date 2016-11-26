@@ -63,7 +63,7 @@ clapDetector.onClaps(3, 2000, function(delay) {
 });
 
 // Update the configuration
-clapDetector.updateConfig(clapConfig);
+clapDetector.updateConfig({CLAP_ENERGY_THRESHOLD: 0.2});
 ```
 
 ## Configuration
