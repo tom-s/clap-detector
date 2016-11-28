@@ -92,7 +92,7 @@ var clapDetector = (function() {
         var filename = appRoot + '/input.wav';
 
         // Listen for sound
-        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' "' + filename + '" silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END + ' −−no−show−progress stat';
+        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END + ' −−no−show−progress stat';
        
         var child = exec(cmd);
 
