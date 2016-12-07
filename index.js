@@ -76,9 +76,6 @@ var clapDetector = (function() {
 
     /* Check if multiple claps have been done */
     function _handleMultipleClaps() {
-        // Clean history
-        clapsHistory = _.takeRight(clapsHistory, CONFIG.MAX_HISTORY_LENGTH); // no need to maintain a big history
-
         // If callback registered, handle them
         if(EVENTS.multipleClaps.length > 0) {
             _.forEach(EVENTS.multipleClaps,  function(cbProps) {
@@ -109,11 +106,15 @@ var clapDetector = (function() {
             if(_isClap(stats)) {
 
                 clapsHistory.push({
+                    id  : (clapsHistory.length) ? _.last(clapsHistory, 1).id + 1 : 1,
                     time: new Date().getTime()
                 });
-                
+
+                // Clean history
+                clapsHistory = _.takeRight(clapsHistory, CONFIG.MAX_HISTORY_LENGTH); // no need to maintain a big history
+
                 if(EVENTS.clap.fn) {
-                    EVENTS.clap.fn();
+                    EVENTS.clap.fn(clapsHistory);
                 }
                 _handleMultipleClaps();
             }
@@ -139,12 +140,15 @@ var clapDetector = (function() {
         return dict;
     }
 
+    function _config(props) {
+        if(props) {
+            _.assign(CONFIG, props);
+        }
+    }
 
     return {
         start: function (props) {
-            if(props) {
-                _.assign(CONFIG, props);
-            }
+            _config(props);
 
             // Start listening
             _listen();
@@ -177,6 +181,11 @@ var clapDetector = (function() {
         // resume
         resume: function() {
             paused = false;
+        },
+
+        // updateConfig
+        updateConfig: function(props) {
+            _config(props);
         }
     };
 })();

@@ -30,13 +30,15 @@ npm install --save clap-detector
 
 ## Usage
 
-There are thee public methods you can use:
+There are four public methods you can use:
 - clapDetector.start(clapConfig);
 => this needs to be called to initialize clap detection. The clapConfig object is not mandatory but you can use it to overwrite the default configuration (see next section)
 - clapDetector.onClap(yourcallbackfunctionhere)
-=> register a callback that will be triggered whenever a clap of hand is detected
+=> register a callback that will be triggered whenever a clap of hand is detected. Your callback can accept an array of ids counting each clap and the corresponding timestamp.
 - clapDetector.onClaps(numberOfClaps, delay, yourcallbackfunctionhere)
 => register a callback that will be triggered whenever a series of claps (determined by the number of claps) is detected within the period of time you've specified (delay).
+- clapDetector.updateConfig(clapConfig);
+=> updates configuration on-the-fly.
 
 ```bash
 // Require the module
@@ -51,14 +53,17 @@ var clapConfig = {
 clapDetector.start(clapConfig);
 
 // Register on clap event
-clapDetector.onClap(function() {
-    //console.log('your callback code here ');
+clapDetector.onClap(function(history) {
+    //console.log('your callback code here ', history);
 });
 
-// Register to a serie of 3 claps occuring within 2 seconds
+// Register to a series of 3 claps occuring within 2 seconds
 clapDetector.onClaps(3, 2000, function(delay) {
     //console.log('your callback code here ');
 });
+
+// Update the configuration
+clapDetector.updateConfig({CLAP_ENERGY_THRESHOLD: 0.2});
 ```
 
 ## Configuration
