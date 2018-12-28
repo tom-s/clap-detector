@@ -24,7 +24,6 @@ brew install sox
 ### npm install
 You can simply add this module to your node.js project with
 ```bash
-// sudo might be required depending on your system
 npm install --save clap-detector
 ```
 
