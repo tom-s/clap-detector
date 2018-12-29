@@ -80,7 +80,6 @@ class ClapDetector {
 
   handleClap() {
     const { MAX_HISTORY_LENGTH } = this.config
-    console.log("debug handleClap")
     // Add clap to history
     this.clapsHistory.push({
       id : size(this.clapsHistory),
@@ -173,14 +172,6 @@ function _handleMultipleClapsEvent(props) {
   }
 }
 
-function _handleMultipleClaps() {
-  // If callback registered, handle them
-  if(EVENTS.multipleClaps.length > 0) {
-    _.forEach(EVENTS.multipleClaps,  function(cbProps) {
-        _handleMultipleClapsEvent(cbProps);
-    });
-  }
-}
 */
 
 export default ClapDetector
