@@ -1,8 +1,6 @@
 /**
  * Copyright (c) 2015 Thomas Schell (https://github.com/tom-s)
 
-
-
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to dealFWAV_
  in the Software without restriction, including without limitation the rights
@@ -26,38 +24,127 @@
  THE SOFTWARE.
  */
 
-import _ from 'lodash'
+import get from 'lodash/get'
+import size from 'lodash/size'
+import last from 'lodash/last'
+import omit from 'lodash/omit'
+import uniqueid from 'lodash/uniqueid'
+import takeRight from 'lodash/takeRight'
+import assign from 'lodash/assign'
 import { exec } from 'child_process'
 import fs from 'fs'
 import appRoot from 'app-root-path'
 import os from 'os'
 
-const clapDetector = (() => {
-    /* DEFAULT CONFIG */
-    var CONFIG = {
-        AUDIO_SOURCE: os.type() === "Darwin" // microphone
-        ? 'coreaudio default'
-        : 'alsa hw:1,0',
-        DETECTION_PERCENTAGE_START : '10%',
-        DETECTION_PERCENTAGE_END: '10%',
-        CLAP_AMPLITUDE_THRESHOLD: 0.7,
-        CLAP_ENERGY_THRESHOLD: 0.3,
-        CLAP_MAX_DURATION: 1500,
-        MAX_HISTORY_LENGTH: 10 // no need to maintain big history
-    };
+const CONFIG = {
+  AUDIO_SOURCE: os.type() === "Darwin" // microphone
+  ? 'coreaudio default'
+  : 'alsa hw:1,0',
+  DETECTION_PERCENTAGE_START : '10%',
+  DETECTION_PERCENTAGE_END: '10%',
+  CLAP_AMPLITUDE_THRESHOLD: 0.7,
+  CLAP_ENERGY_THRESHOLD: 0.3,
+  CLAP_MAX_DURATION: 1500,
+  MAX_HISTORY_LENGTH: 10 // no need to maintain big history
+}
 
-    var paused = false;
+const parseOutput = body => {
+  body = body.replace(new RegExp("[ \\t]+", "g") , " ") //sox use spaces to align output
+  const split = new RegExp("^(.*):\\s*(.*)$", "mg"), match, dict = {} //simple key:value
+  while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2])
+  return dict
+}
 
-    /* Callback for events */
-    var EVENTS = {
-        clap: {
-            fn: null,
-        },
-        multipleClaps: []
-    };
+class ClapDetector {
+  constructor(props) {
+    this.config = {
+      ...CONFIG,
+      ...props
+    }
+    this.paused = false
+    this.clapsHistory = []
+    this.cbs = {}
+    // Start listening
+    this.listen()
+  }
 
-    /* History of claps */
-    var clapsHistory = [];
+  isClap = stats => {
+    const { CLAP_MAX_DURATION, CLAP_AMPLITUDE_THRESHOLD, CLAP_ENERGY_THRESHOLD } = this.config
+    const duration = get(stats, 'Length (seconds)')
+    const rms = get(stats, 'RMS amplitude')
+    const max = get(stats, 'Maximum amplitude')
+    return (duration < CLAP_MAX_DURATION && max > CLAP_AMPLITUDE_THRESHOLD && rms < CLAP_ENERGY_THRESHOLD)
+  }
+
+  handleClap = () => {
+    console.log("debug handleClap", this.cbs)
+    // Add clap to history
+    this.clapsHistory.push({
+      id : size(this.clapsHistory)
+      time: new Date().getTime()
+    })
+    // Clean history
+    this.clapsHistory = takeRight(this.clapsHistory, MAX_HISTORY_LENGTH) // no need to maintain a big history
+  }
+
+  listen = () => {
+    try {
+      const { MAX_HISTORY_LENGTH, AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
+      const filename = appRoot + '/input.wav'
+      // Listen for sound
+      const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
+      const child = exec(cmd)
+      let body  = ''
+      child.stderr.on("data", buf => {
+        console.log("debug data", bug)
+        body += buf
+      })
+      child.on("exit", () => {
+        const stats = parseOutput(body)
+        console.log("debug stats", stats)
+        if(this.isClap(stats)) {
+          this.handleClap()
+        }
+        this.listen() // listen again
+      })
+    } catch(e) {
+      console.log("error listening", e)
+    }
+  }
+
+  addClapListener = (cb = () => {}, { number = 2, maxDelay = 2000 }) => {
+    const listenerId = uniqueid()
+    this.cbs = {
+      ...this.cbs,
+      [listenerId]: {
+        {
+          id: listenerId,
+          cb,
+          number,
+          maxDelay
+        }
+      }
+    }
+    const release = () => {
+      this.cbs = omit(this.cbs, [listenerId])
+    }
+    return release
+  }
+
+  // pause
+  pause = () => {
+    this.paused = true
+  }
+
+  // resume
+  resume = () => {
+    this.paused = false
+  }
+}
+
+
+/*
+
 
     function _handleMultipleClapsEvent(props) {
         // Retrieve latest claps
@@ -73,7 +160,6 @@ const clapDetector = (() => {
         }
     }
 
-    /* Check if multiple claps have been done */
     function _handleMultipleClaps() {
         // If callback registered, handle them
         if(EVENTS.multipleClaps.length > 0) {
@@ -83,110 +169,6 @@ const clapDetector = (() => {
         }
     }
 
-    /* Listen */
-    function _listen() {
-        var args = [];
-        var body  = '';
-
-        var filename = appRoot + '/input.wav';
-
-        // Listen for sound
-        var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END + ' −−no−show−progress stat';
-
-        var child = exec(cmd);
-
-        child.stderr.on("data", function(buf){
-            body += buf;
-        });
-
-        child.on("exit", function() {
-
-            var stats = _parse(body);
-            if(_isClap(stats)) {
-
-                clapsHistory.push({
-                    id  : (clapsHistory.length) ? _.last(clapsHistory, 1).id + 1 : 1,
-                    time: new Date().getTime()
-                });
-
-                // Clean history
-                clapsHistory = _.takeRight(clapsHistory, CONFIG.MAX_HISTORY_LENGTH); // no need to maintain a big history
-
-                if(EVENTS.clap.fn) {
-                    EVENTS.clap.fn(clapsHistory);
-                }
-                _handleMultipleClaps();
-            }
-
-             _listen(); // listen again
-
-        });
-    }
-
-    function _isClap(stats) {
-
-        var duration = stats['Length (seconds)'],
-        rms      = stats['RMS amplitude'],
-        max      = stats['Maximum amplitude'];
-
-        return (duration < CONFIG.CLAP_MAX_DURATION && max > CONFIG.CLAP_AMPLITUDE_THRESHOLD && rms < CONFIG.CLAP_ENERGY_THRESHOLD);
-    }
-
-    function _parse(body) {
-        body = body.replace(new RegExp("[ \\t]+", "g") , " "); //sox use spaces to align output
-        var split = new RegExp("^(.*):\\s*(.*)$", "mg"), match, dict = {}; //simple key:value
-        while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2]);
-        return dict;
-    }
-
-    function _config(props) {
-        if(props) {
-            _.assign(CONFIG, props);
-        }
-    }
-
-    return {
-        start: function (props) {
-            _config(props);
-
-            // Start listening
-            _listen();
-        },
-
-        //1 clap
-        onClap: function (cb) {
-            if(cb) {
-                EVENTS.clap.fn = cb;
-            }
-        },
-
-        // multiples claps
-        onClaps: function (num, maxDelay, cb) {
-            if(num && maxDelay && cb) {
-                EVENTS.multipleClaps.push({
-                    num: num,
-                    maxDelay: maxDelay,
-                    fn: cb
-                });
-            }
-
-        },
-
-        // pause
-        pause: function() {
-            paused = true;
-        },
-
-        // resume
-        resume: function() {
-            paused = false;
-        },
-
-        // updateConfig
-        updateConfig: function(props) {
-            _config(props);
-        }
-    };
-})();
+*/
 
 export default clapDetector
