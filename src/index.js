@@ -131,7 +131,6 @@ class ClapDetector {
 
       const child = exec(cmd, (err) => {
         if (err) {
-          console.error(`error listening : ${err}`);
           throw err
           return
         }
@@ -147,7 +146,7 @@ class ClapDetector {
         this.listen() // listen again
       })
     } catch(e) {
-      console.log("caught error", e)
+      console.error("caught error", e)
     }
   }
 
