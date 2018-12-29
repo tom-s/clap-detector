@@ -28,6 +28,8 @@ import get from 'lodash/get'
 import size from 'lodash/size'
 import last from 'lodash/last'
 import omit from 'lodash/omit'
+import maxBy from 'lodash/maxBy'
+import orderBy from 'lodash/orderBy'
 import uniqueid from 'lodash/uniqueid'
 import takeRight from 'lodash/takeRight'
 import assign from 'lodash/assign'
@@ -66,6 +68,7 @@ class ClapDetector {
     this.isPaused = false
     this.clapsHistory = []
     this.cbs = {}
+    this.timeout = null
     // Start listening
     this.listen()
   }
@@ -86,13 +89,16 @@ class ClapDetector {
       time: new Date().getTime()
     })
     // Trigger callbacks
-    this.triggerCallbacks()
+    const waitDelay = get(maxBy(Object.values(this.cbs), cb => cb.maxDelay), 'maxDelay', 0)
+    this.timeout && clearTimeout(this.timeout)
+    this.timeout = setTimeout(() => this.triggerCallback(), waitDelay + 100)
     // No need to maintain a big history
     this.clapsHistory = takeRight(this.clapsHistory, MAX_HISTORY_LENGTH)
   }
 
-  triggerCallbacks() {
-    console.log("debug triggerCallbacks", this.cbs)
+  triggerCallback() {
+    const callbacks = orderBy(Object.values(this.cbs), 'number', 'desc')
+    console.log("debug callbacks", callbacks)
   }
 
   listen() {
@@ -128,7 +134,7 @@ class ClapDetector {
   }
 
   addClapListener(cb = () => {}, options = {}) {
-    const { number = 2, maxDelay = 2000 } = options
+    const { number = 1, maxDelay = 1000 } = options
     const listenerId = uniqueid()
     this.cbs = {
       ...this.cbs,
