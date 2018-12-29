@@ -156,7 +156,6 @@ class ClapDetector {
   }
 }
 
-
 /*
 function _handleMultipleClapsEvent(props) {
   // Retrieve latest claps
