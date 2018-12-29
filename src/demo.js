@@ -20,10 +20,9 @@ const cancelThreeClapsListener = clap.addClapsListener(claps => {
 
 // Example: canceling clap listeners
 // Cancel alls claps listener but 2 claps after 10 seconds
-/*
 setTimeout(() => {
   console.log("only listen to 2 claps now")
   cancelOneClapListener()
   cancelOneClapForceListener()
   cancelThreeClapsListener()
-}, 10000)*/
+}, 10000)
