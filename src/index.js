@@ -26,9 +26,11 @@
 
 import get from 'lodash/get'
 import size from 'lodash/size'
+import first from 'lodash/first'
 import last from 'lodash/last'
 import omit from 'lodash/omit'
 import maxBy from 'lodash/maxBy'
+import isEmpty from 'lodash/isEmpty'
 import orderBy from 'lodash/orderBy'
 import uniqueid from 'lodash/uniqueid'
 import takeRight from 'lodash/takeRight'
@@ -47,7 +49,7 @@ const CONFIG = {
   CLAP_AMPLITUDE_THRESHOLD: 0.7,
   CLAP_ENERGY_THRESHOLD: 0.3,
   CLAP_MAX_DURATION: 1500,
-  MAX_HISTORY_LENGTH: 10 // no need to maintain big history
+  MAX_HISTORY_LENGTH: 100 // no need to maintain big history
 }
 
 const parseOutput = body => {
@@ -89,16 +91,34 @@ class ClapDetector {
       time: new Date().getTime()
     })
     // Trigger callbacks
-    const waitDelay = get(maxBy(Object.values(this.cbs), cb => cb.maxDelay), 'maxDelay', 0)
+    const waitDelay = get(maxBy(Object.values(this.cbs), cb => cb.delay), 'delay', 0)
     this.timeout && clearTimeout(this.timeout)
     this.timeout = setTimeout(() => this.triggerCallback(), waitDelay + 100)
+    this.triggerCallback(true)
     // No need to maintain a big history
     this.clapsHistory = takeRight(this.clapsHistory, MAX_HISTORY_LENGTH)
   }
 
-  triggerCallback() {
-    const callbacks = orderBy(Object.values(this.cbs), 'number', 'desc')
-    console.log("debug callbacks", callbacks)
+  triggerCallback(force = false) {
+    const forceCallbacks = orderBy(Object.values(this.cbs), 'number', 'desc')
+      .filter(cb => cb.force === force)
+    const triggerCallbacks = forceCallbacks.reduce((memo, cb) => {
+      const claps = takeRight(this.clapsHistory, cb.number)
+      // Check that the delay between the last clap and the first is inferior to what was requested by user
+      const lastClap = last(claps)
+      const firstClap = first(claps)
+      const delay = lastClap.time - firstClap.time
+      const clapsDetected = size(claps) === cb.number && delay <= cb.delay
+      clapsDetected && memo.push({
+        fn: cb.fn,
+        claps
+      })
+      return memo
+    }, [])
+    const filteredTriggerCallbacks = force
+      ? triggerCallbacks
+      : [first(triggerCallbacks)]
+    filteredTriggerCallbacks.forEach(({ fn, claps }) => fn(claps))
   }
 
   listen() {
@@ -123,9 +143,7 @@ class ClapDetector {
 
       child.on("exit", () => {
         const stats = parseOutput(body)
-        if(!this.isPaused && this.isClap(stats)) {
-          this.handleClap()
-        }
+        !this.isPaused && this.isClap(stats) && this.handleClap()
         this.listen() // listen again
       })
     } catch(e) {
@@ -133,16 +151,17 @@ class ClapDetector {
     }
   }
 
-  addClapListener(cb = () => {}, options = {}) {
-    const { number = 1, maxDelay = 1000 } = options
+  addClapListener(fn = () => {}, options = {}) {
+    const { number = 1, delay = 1000, force = false } = options
     const listenerId = uniqueid()
     this.cbs = {
       ...this.cbs,
       [listenerId]: {
         id: listenerId,
-        cb,
+        fn,
         number,
-        maxDelay
+        delay,
+        force
       }
     }
     const release = () => {
@@ -171,7 +190,7 @@ function _handleMultipleClapsEvent(props) {
     var lastClap = _.last(latestClaps);
     var firstClap = _.first(latestClaps);
     var delay = lastClap.time - firstClap.time;
-    if(delay < props.maxDelay) {
+    if(delay < props.delay) {
         props.fn(delay);
     }
   }
