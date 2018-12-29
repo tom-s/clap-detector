@@ -67,7 +67,6 @@ class ClapDetector {
       ...CONFIG,
       ...props
     }
-    this.isPaused = false
     this.clapsHistory = []
     this.cbs = {}
     this.timeout = null
@@ -142,7 +141,7 @@ class ClapDetector {
 
       child.on("exit", () => {
         const stats = parseOutput(body)
-        !this.isPaused && this.isClap(stats) && this.handleClap()
+        this.isClap(stats) && this.handleClap()
         this.listen() // listen again
       })
     } catch(e) {
@@ -168,33 +167,6 @@ class ClapDetector {
     }
     return release
   }
-
-  // pause
-  pause() {
-    this.isPaused = true
-  }
-
-  // resume
-  resume() {
-    this.isPaused = false
-  }
 }
-
-/*
-function _handleMultipleClapsEvent(props) {
-  // Retrieve latest claps
-  var latestClaps = _.takeRight(clapsHistory, props.num);
-  if(latestClaps.length === props.num) {
-    // Check that the delay between the last clap and the first is inferior to what was requested by user
-    var lastClap = _.last(latestClaps);
-    var firstClap = _.first(latestClaps);
-    var delay = lastClap.time - firstClap.time;
-    if(delay < props.delay) {
-        props.fn(delay);
-    }
-  }
-}
-
-*/
 
 export default ClapDetector
