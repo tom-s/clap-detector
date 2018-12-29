@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build:watch & node demo",
+    "start": "npm run build:watch & node lib/demo",
     "build:watch": "npx babel --watch -d lib src",
     "build": "npx babel -d lib src"
   },
