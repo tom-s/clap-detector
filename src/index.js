@@ -150,7 +150,7 @@ class ClapDetector {
     }
   }
 
-  addClapListener(fn = () => {}, options = {}) {
+  addClapsListener(fn = () => {}, options = {}) {
     const { number = 1, delay = 1000, force = false } = options
     const listenerId = uniqueid()
     this.cbs = {
