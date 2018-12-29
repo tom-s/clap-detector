@@ -25,6 +25,7 @@
  */
 
 import get from 'lodash/get'
+import compact from 'lodash/compact'
 import size from 'lodash/size'
 import first from 'lodash/first'
 import last from 'lodash/last'
@@ -70,6 +71,7 @@ class ClapDetector {
     this.clapsHistory = []
     this.cbs = {}
     this.timeout = null
+    this.child = null
     // Start listening
     this.listen()
   }
@@ -117,7 +119,7 @@ class ClapDetector {
     const filteredTriggerCallbacks = force
       ? triggerCallbacks
       : [first(triggerCallbacks)]
-    filteredTriggerCallbacks.forEach(({ fn, claps }) => fn(claps))
+    compact(filteredTriggerCallbacks).forEach(({ fn, claps }) => fn(claps))
   }
 
   listen() {
@@ -128,24 +130,24 @@ class ClapDetector {
       const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
       let body  = ''
 
-      const child = exec(cmd, (err) => {
+      this.child = exec(cmd, (err) => {
         if (err) {
           throw err
           return
         }
       })
 
-      child.stderr.on("data", buf => {
+      this.child.stderr.on("data", buf => {
         body += buf
       })
 
-      child.on("exit", () => {
+      this.child.on("exit", () => {
         const stats = parseOutput(body)
         this.isClap(stats) && this.handleClap()
         this.listen() // listen again
       })
     } catch(e) {
-      console.error("caught error", e)
+      console.error("error running sox", e)
     }
   }
 
@@ -162,10 +164,19 @@ class ClapDetector {
         force
       }
     }
-    const release = () => {
+    const dispose = () => {
       this.cbs = omit(this.cbs, [listenerId])
     }
-    return release
+    return dispose
+  }
+
+  dispose() {
+    this.child && this.child.kill(0)
+    this.timeout && clearTimeout(this.timeout)
+    this.clapsHistory = []
+    this.cbs = {}
+    this.timeout = null
+    this.child = null
   }
 }
 
