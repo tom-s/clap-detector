@@ -27,7 +27,6 @@
  */
 
 var _ = require('lodash');
-var Q = require('q');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var appRoot = require('app-root-path');
@@ -93,15 +92,15 @@ var clapDetector = (function() {
 
         // Listen for sound
         var cmd = 'sox -t ' + CONFIG.AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + CONFIG.DETECTION_PERCENTAGE_START + ' 1 0.1 ' + CONFIG.DETECTION_PERCENTAGE_END + ' −−no−show−progress stat';
-       
+
         var child = exec(cmd);
 
-        child.stderr.on("data", function(buf){ 
-            body += buf; 
+        child.stderr.on("data", function(buf){
+            body += buf;
         });
 
         child.on("exit", function() {
-            
+
             var stats = _parse(body);
             if(_isClap(stats)) {
 
