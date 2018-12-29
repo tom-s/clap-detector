@@ -2,11 +2,11 @@
   "name": "clap-detector",
   "version": "0.4.1",
   "description": "Clap detection for node js (linux, raspberry systems)",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run build-lib",
-    "build-lib": "npx babel -d lib src"
+    "start": "npx babel --watch -d lib src",
+    "build": "npx babel -d lib src"
   },
   "repository": {
     "type": "git",

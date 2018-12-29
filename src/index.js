@@ -26,13 +26,13 @@
  THE SOFTWARE.
  */
 
-var _ = require('lodash');
-var exec = require('child_process').exec;
-var fs = require('fs');
-var appRoot = require('app-root-path');
-var os = require('os');
+import _ from 'lodash'
+import { exec } from 'child_process'
+import fs from 'fs'
+import appRoot from 'app-root-path'
+import os from 'os'
 
-var clapDetector = (function() {
+const clapDetector = (() => {
     /* DEFAULT CONFIG */
     var CONFIG = {
         AUDIO_SOURCE: os.type() === "Darwin" // microphone
@@ -189,4 +189,4 @@ var clapDetector = (function() {
     };
 })();
 
-module.exports = clapDetector;
+export default clapDetector
