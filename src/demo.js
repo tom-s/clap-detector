@@ -1,4 +1,3 @@
-// Test
 import ClapDetector from './index'
 
 const clap = new ClapDetector()

@@ -29,63 +29,90 @@ npm install --save clap-detector
 
 ## Usage
 
-There are four public methods you can use:
-- clapDetector.start(clapConfig);
-=> this needs to be called to initialize clap detection. The clapConfig object is not mandatory but you can use it to overwrite the default configuration (see next section)
-- clapDetector.onClap(yourcallbackfunctionhere)
-=> register a callback that will be triggered whenever a clap of hand is detected. Your callback can accept an array of ids counting each clap and the corresponding timestamp.
-- clapDetector.onClaps(numberOfClaps, delay, yourcallbackfunctionhere)
-=> register a callback that will be triggered whenever a series of claps (determined by the number of claps) is detected within the period of time you've specified (delay).
-- clapDetector.updateConfig(clapConfig);
-=> updates configuration on-the-fly.
+First, create an instance of the ClapDetector class:
+```bash
+const clap = new ClapDetector()
+```
+
+Then register a callback that will be triggered whenever a series of hand claps is detected. Your callback will be provided with an array of claps and their associated timestamps as arguments.
 
 ```bash
-// Require the module
-var clapDetector = require('clap-detector');
+const disposableOneClapListener = clap.addClapsListener(claps => {
+  console.log("heard 1 clap (force)", claps)
+}, { number: 1, delay: 0, force: true })
+```
 
-// Define configuration
-var clapConfig = {
-   AUDIO_SOURCE: 'alsa hw:1,0'// default for linux
-};
+You can dispose (remove) an clap listener by calling the disposable method returned by addClapsListeners
 
-// Start clap detection
-clapDetector.start(clapConfig);
+```bash
+disposableOneClapListener() // dispose the clap listener
+```
 
-// Register on clap event
-clapDetector.onClap(function(history) {
-    //console.log('your callback code here ', history);
-});
+Finally  you can call the dispose() method when you want to stop clap detection and free associated resources
 
-// Register to a series of 3 claps occuring within 2 seconds
-clapDetector.onClaps(3, 2000, function(delay) {
-    //console.log('your callback code here ');
-});
+```bash
+clap.dispose()
+```
 
-// Update the configuration
-clapDetector.updateConfig({CLAP_ENERGY_THRESHOLD: 0.2});
+## Full example
+```bash
+import ClapDetector from 'clap-detector'
+
+const clap = new ClapDetector()
+const disposableOneClapListener = clap.addClapsListener(claps => {
+  console.log("heard 1 clap (force)", claps)
+}, { number: 1, delay: 0, force: true })
+
+const disposableOneClapForceListener = clap.addClapsListener(claps => {
+  console.log("heard 1 clap", claps)
+}, { number: 1, delay: 1000 })
+
+const disposableTwoClapsListener = clap.addClapsListener(claps => {
+  console.log("heard 2 claps", claps)
+}, { number: 2, delay: 1000 })
+
+const disposableThreeClapsListener = clap.addClapsListener(claps => {
+  console.log("heard 3 claps", claps)
+}, { number: 3, delay: 1000 })
+
+// Cancel some clap listeners
+// Cancel alls claps listener but 2 claps after 10 seconds
+setTimeout(() => {
+  console.log("only listen to 2 claps now")
+  disposableOneClapListener()
+  disposableOneClapForceListener()
+  disposableThreeClapsListener()
+}, 10000)
+
+// Dispose (stop sox process and listeners) after 30s
+setTimeout(() => {
+  console.log("dispose all listeners and free ressources")
+  clap.dispose()
+}, 30000)
 ```
 
 ## Configuration
 
-You can pass a configuration object at the initialisation time (clapDetector.init(yourConfObject)). If you don't the following config will be used. You should at least provide the audio input (if different from the default config).
+You can pass a configuration object when you create an instance of the ClapDetector class. If you don't the following config will be used.
 
 ```bash
 // DEFAULT CONFIG
 var CONFIG = {
-        AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
-        DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
-        DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
-        CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
-        CLAP_ENERGY_THRESHOLD: 0.3,  // maximum energy threshold to be considered as clap
-        MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
-    };
+  AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
+  DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
+  DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
+  CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
+  CLAP_ENERGY_THRESHOLD: 0.3,  // maximum energy threshold to be considered as clap
+  MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
+}
+const clap = new ClapDetector(config)
 ```
 
 If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.
 
 ## Tests
 
-These will be added soon. Please do not hesitate to add some !
+These will be added soon. Please do not hesitate to submit some Ò!
 
 ## About the Author
 

@@ -17,6 +17,7 @@
     "node",
     "js",
     "clap",
+    "trigger",
     "detection",
     "sox",
     "alsa",
