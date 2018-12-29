@@ -50,7 +50,9 @@ const CONFIG = {
 
 const parseOutput = body => {
   body = body.replace(new RegExp("[ \\t]+", "g") , " ") //sox use spaces to align output
-  const split = new RegExp("^(.*):\\s*(.*)$", "mg"), match, dict = {} //simple key:value
+  const split = new RegExp("^(.*):\\s*(.*)$", "mg")
+  let match = ''
+  let dict = {} //simple key:value
   while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2])
   return dict
 }
@@ -61,14 +63,14 @@ class ClapDetector {
       ...CONFIG,
       ...props
     }
-    this.paused = false
+    this.isPaused = false
     this.clapsHistory = []
     this.cbs = {}
     // Start listening
     this.listen()
   }
 
-  isClap = stats => {
+  isClap(stats) {
     const { CLAP_MAX_DURATION, CLAP_AMPLITUDE_THRESHOLD, CLAP_ENERGY_THRESHOLD } = this.config
     const duration = get(stats, 'Length (seconds)')
     const rms = get(stats, 'RMS amplitude')
@@ -76,53 +78,66 @@ class ClapDetector {
     return (duration < CLAP_MAX_DURATION && max > CLAP_AMPLITUDE_THRESHOLD && rms < CLAP_ENERGY_THRESHOLD)
   }
 
-  handleClap = () => {
-    console.log("debug handleClap", this.cbs)
+  handleClap() {
+    const { MAX_HISTORY_LENGTH } = this.config
+    console.log("debug handleClap")
     // Add clap to history
     this.clapsHistory.push({
-      id : size(this.clapsHistory)
+      id : size(this.clapsHistory),
       time: new Date().getTime()
     })
-    // Clean history
-    this.clapsHistory = takeRight(this.clapsHistory, MAX_HISTORY_LENGTH) // no need to maintain a big history
+    // Trigger callbacks
+    this.triggerCallbacks()
+    // No need to maintain a big history
+    this.clapsHistory = takeRight(this.clapsHistory, MAX_HISTORY_LENGTH)
   }
 
-  listen = () => {
+  triggerCallbacks() {
+    console.log("debug triggerCallbacks", this.cbs)
+  }
+
+  listen() {
     try {
       const { MAX_HISTORY_LENGTH, AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
       const filename = appRoot + '/input.wav'
       // Listen for sound
       const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
-      const child = exec(cmd)
       let body  = ''
+
+      const child = exec(cmd, (err) => {
+        if (err) {
+          console.error(`error listening : ${err}`);
+          throw err
+          return
+        }
+      })
+
       child.stderr.on("data", buf => {
-        console.log("debug data", bug)
         body += buf
       })
+
       child.on("exit", () => {
         const stats = parseOutput(body)
-        console.log("debug stats", stats)
-        if(this.isClap(stats)) {
+        if(!this.isPaused && this.isClap(stats)) {
           this.handleClap()
         }
         this.listen() // listen again
       })
     } catch(e) {
-      console.log("error listening", e)
+      console.log("caught error", e)
     }
   }
 
-  addClapListener = (cb = () => {}, { number = 2, maxDelay = 2000 }) => {
+  addClapListener(cb = () => {}, options = {}) {
+    const { number = 2, maxDelay = 2000 } = options
     const listenerId = uniqueid()
     this.cbs = {
       ...this.cbs,
       [listenerId]: {
-        {
-          id: listenerId,
-          cb,
-          number,
-          maxDelay
-        }
+        id: listenerId,
+        cb,
+        number,
+        maxDelay
       }
     }
     const release = () => {
@@ -132,43 +147,40 @@ class ClapDetector {
   }
 
   // pause
-  pause = () => {
-    this.paused = true
+  pause() {
+    this.isPaused = true
   }
 
   // resume
-  resume = () => {
-    this.paused = false
+  resume() {
+    this.isPaused = false
   }
 }
 
 
 /*
-
-
-    function _handleMultipleClapsEvent(props) {
-        // Retrieve latest claps
-        var latestClaps = _.takeRight(clapsHistory, props.num);
-        if(latestClaps.length === props.num) {
-            // Check that the delay between the last clap and the first is inferior to what was requested by user
-            var lastClap = _.last(latestClaps);
-            var firstClap = _.first(latestClaps);
-            var delay = lastClap.time - firstClap.time;
-            if(delay < props.maxDelay) {
-                props.fn(delay);
-            }
-        }
+function _handleMultipleClapsEvent(props) {
+  // Retrieve latest claps
+  var latestClaps = _.takeRight(clapsHistory, props.num);
+  if(latestClaps.length === props.num) {
+    // Check that the delay between the last clap and the first is inferior to what was requested by user
+    var lastClap = _.last(latestClaps);
+    var firstClap = _.first(latestClaps);
+    var delay = lastClap.time - firstClap.time;
+    if(delay < props.maxDelay) {
+        props.fn(delay);
     }
+  }
+}
 
-    function _handleMultipleClaps() {
-        // If callback registered, handle them
-        if(EVENTS.multipleClaps.length > 0) {
-            _.forEach(EVENTS.multipleClaps,  function(cbProps) {
-                _handleMultipleClapsEvent(cbProps);
-            });
-        }
-    }
-
+function _handleMultipleClaps() {
+  // If callback registered, handle them
+  if(EVENTS.multipleClaps.length > 0) {
+    _.forEach(EVENTS.multipleClaps,  function(cbProps) {
+        _handleMultipleClapsEvent(cbProps);
+    });
+  }
+}
 */
 
-export default clapDetector
+export default ClapDetector
