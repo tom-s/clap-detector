@@ -124,7 +124,7 @@ setTimeout(() => {
 
 ## Configuration
 
-You can pass a configuration object when you create an instance of the ClapDetector class. If you don't the following config will be used.
+You can pass a configuration object and override the default values when you create an instance of the ClapDetector class. If you don't the following config will be used.
 
 ```bash
 // DEFAULT CONFIG
