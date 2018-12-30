@@ -36,22 +36,53 @@ const clap = new ClapDetector()
 
 Then register a callback that will be triggered whenever a series of hand claps is detected. Your callback will be provided with an array of claps and their associated timestamps as arguments.
 
+
 ```bash
 const disposableOneClapListener = clap.addClapsListener(claps => {
-  console.log("heard 1 clap (force)", claps)
-}, { number: 1, delay: 0, force: true })
+  console.log("heard 1 clap", claps)
+}, { number: 1, delay: 0 })
 ```
 
-You can dispose (remove) an clap listener by calling the disposable method returned by addClapsListeners
+You can dispose (remove) a clap listener by calling the disposable method returned by addClapsListeners
 
 ```bash
 disposableOneClapListener() // dispose the clap listener
 ```
 
-Finally  you can call the dispose() method when you want to stop clap detection and free associated resources
+Finally  you can call the dispose() method when you want to stop all clap detection and free associated resources
 
 ```bash
 clap.dispose()
+```
+
+### addClapsListener
+* Type : *Function*
+* Arguments: *(callback [Function], options [Object])*
+
+###### list of options
+| Option  | Description |Default value |
+| ------------- | ------------- |  ------------- |
+| number  | Number of claps  | 1  |
+| delay  | Period within the specified number of claps must be heard (ms)  |  1000 |
+| force  | If true, trigger callback every time even if a listener with a higher number is triggered  |false  |
+
+## Real life example
+```bash
+import ClapDetector from 'clap-detector'
+
+const clap = new ClapDetector()
+
+clap.addClapsListener(claps => {
+  console.log("change tv channel")
+}, { number: 1, delay: 0 })
+
+clap.addClapsListener(claps => {
+  console.log("turn tv on", claps)
+}, { number: 2, delay: 1000 })
+
+clap.addClapsListener(claps => {
+  console.log("turn tv off", claps)
+}, { number: 3, delay: 1000 })
 ```
 
 ## Full example
@@ -98,7 +129,7 @@ You can pass a configuration object when you create an instance of the ClapDetec
 ```bash
 // DEFAULT CONFIG
 var CONFIG = {
-  AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you don't know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
+  AUDIO_SOURCE: 'hw:1,0', // this is your microphone input. If you dont know it you can refer to this thread (http://www.voxforge.org/home/docs/faq/faq/linux-how-to-determine-your-audio-cards-or-usb-mics-maximum-sampling-rate)
   DETECTION_PERCENTAGE_START : '5%', // minimum noise percentage threshold necessary to start recording sound
   DETECTION_PERCENTAGE_END: '5%',  // minimum noise percentage threshold necessary to stop recording sound
   CLAP_AMPLITUDE_THRESHOLD: 0.7, // minimum amplitude threshold to be considered as clap
