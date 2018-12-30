@@ -1,10 +1,13 @@
 {
   "name": "clap-detector",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Clap detection for node js (linux, raspberry systems)",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build:watch & node lib/demo",
+    "build:watch": "npx babel --watch -d lib src",
+    "build": "npx babel -d lib src"
   },
   "repository": {
     "type": "git",
@@ -14,6 +17,7 @@
     "node",
     "js",
     "clap",
+    "trigger",
     "detection",
     "sox",
     "alsa",
@@ -33,8 +37,12 @@
   },
   "homepage": "https://github.com/tom-s/clapDetector#readme",
   "dependencies": {
-    "app-root-path": "^1.0.0",
-    "lodash": "^3.10.1",
-    "q": "^1.4.1"
+    "app-root-path": "2.1.0",
+    "lodash": "4.17.11"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.2.2",
+    "@babel/preset-env": "7.2.3"
   }
 }
