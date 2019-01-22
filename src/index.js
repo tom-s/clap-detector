@@ -33,7 +33,7 @@ import omit from 'lodash/omit'
 import maxBy from 'lodash/maxBy'
 import isEmpty from 'lodash/isEmpty'
 import orderBy from 'lodash/orderBy'
-import uniqueid from 'lodash/uniqueid'
+import uniqueId from 'lodash/uniqueId'
 import takeRight from 'lodash/takeRight'
 import assign from 'lodash/assign'
 import { exec } from 'child_process'
@@ -153,7 +153,7 @@ class ClapDetector {
 
   addClapsListener(fn = () => {}, options = {}) {
     const { number = 1, delay = 1000, force = false } = options
-    const listenerId = uniqueid()
+    const listenerId = uniqueId()
     this.cbs = {
       ...this.cbs,
       [listenerId]: {
