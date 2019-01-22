@@ -1,6 +1,6 @@
 {
   "name": "clap-detector",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Clap detection for node js (linux, raspberry systems)",
   "main": "lib/index.js",
   "scripts": {
