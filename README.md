@@ -136,7 +136,7 @@ var CONFIG = {
   CLAP_ENERGY_THRESHOLD: 0.3,  // maximum energy threshold to be considered as clap
   MAX_HISTORY_LENGTH: 10 // all claps are stored in history, this is its max length
 }
-const clap = new ClapDetector(config)
+const clap = new ClapDetector(CONFIG)
 ```
 
 If you wish to improve the clap detection you can fiddle with the CLAP_AMPLITUDE_THRESHOLD and CLAP_ENERGY_THRESHOLD values. Depending on your microphone these might need to be modified.
