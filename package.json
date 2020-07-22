@@ -1,7 +1,7 @@
 {
   "name": "clap-detector",
-  "version": "0.5.1",
-  "description": "Clap detection for node js (linux, raspberry systems)",
+  "version": "1.0.0",
+  "description": "Clap detection for node js",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -37,12 +37,12 @@
   },
   "homepage": "https://github.com/tom-s/clapDetector#readme",
   "dependencies": {
-    "app-root-path": "2.1.0",
+    "app-root-path": "3.0.0",
     "lodash": "4.17.19"
   },
   "devDependencies": {
-    "@babel/cli": "7.2.3",
-    "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.2.3"
+    "@babel/cli": "7.10.5",
+    "@babel/core": "7.10.5",
+    "@babel/preset-env": "7.10.4"
   }
 }
