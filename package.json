@@ -38,7 +38,7 @@
   "homepage": "https://github.com/tom-s/clapDetector#readme",
   "dependencies": {
     "app-root-path": "2.1.0",
-    "lodash": "4.17.15"
+    "lodash": "4.17.19"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
