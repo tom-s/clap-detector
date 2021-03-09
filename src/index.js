@@ -44,7 +44,9 @@ import os from 'os'
 const CONFIG = {
   AUDIO_SOURCE: os.type() === "Darwin" // microphone
   ? 'coreaudio default'
-  : 'alsa hw:1,0',
+  : (os.type() === "Windows_NT"
+    ? 'waveaudio default'
+    : 'alsa hw:1,0'),
   DETECTION_PERCENTAGE_START : '10%',
   DETECTION_PERCENTAGE_END: '10%',
   CLAP_AMPLITUDE_THRESHOLD: 0.7,
