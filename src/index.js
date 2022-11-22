@@ -132,7 +132,6 @@ class ClapDetector {
       this.child = exec(cmd, (err) => {
         if (err) {
           throw err
-          return
         }
       })
 
