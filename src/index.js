@@ -57,7 +57,9 @@ const parseOutput = body => {
   const split = new RegExp("^(.*):\\s*(.*)$", "mg")
   let match = ''
   let dict = {} //simple key:value
-  while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2])
+  while((match = split.exec(body)) !== null) {
+    dict[match[1]] = parseFloat(match[2])
+  }
   return dict
 }
 
