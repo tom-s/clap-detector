@@ -52,6 +52,7 @@ const CONFIG = {
   CLAP_AMPLITUDE_THRESHOLD: 0.7,
   CLAP_ENERGY_THRESHOLD: 0.3,
   CLAP_MAX_DURATION: 1500,
+  CLAP_ROUGH_THRESHOLD: 1000,
   MAX_HISTORY_LENGTH: 100 // no need to maintain big history
 }
 
@@ -79,11 +80,12 @@ class ClapDetector {
   }
 
   isClap(stats) {
-    const { CLAP_MAX_DURATION, CLAP_AMPLITUDE_THRESHOLD, CLAP_ENERGY_THRESHOLD } = this.config
+    const { CLAP_MAX_DURATION, CLAP_AMPLITUDE_THRESHOLD, CLAP_ENERGY_THRESHOLD, CLAP_ROUGH_THRESHOLD } = this.config
     const duration = get(stats, 'Length (seconds)')
     const rms = get(stats, 'RMS amplitude')
     const max = get(stats, 'Maximum amplitude')
-    return (duration < CLAP_MAX_DURATION && max > CLAP_AMPLITUDE_THRESHOLD && rms < CLAP_ENERGY_THRESHOLD)
+    const rough = get(stats, 'Rough frequency');
+    return (duration < CLAP_MAX_DURATION && max > CLAP_AMPLITUDE_THRESHOLD && rms < CLAP_ENERGY_THRESHOLD && rough > CLAP_ROUGH_THRESHOLD)
   }
 
   handleClap() {
