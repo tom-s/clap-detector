@@ -117,7 +117,7 @@ setTimeout(() => {
 
 // Dispose (stop sox process and listeners) after 30s
 setTimeout(() => {
-  console.log("dispose all listeners and free ressources")
+  console.log("dispose all listeners and free resources")
   clap.dispose()
 }, 30000)
 ```
