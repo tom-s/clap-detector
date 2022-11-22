@@ -123,7 +123,7 @@ class ClapDetector {
 
   listen() {
     try {
-      const { MAX_HISTORY_LENGTH, AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
+      const { AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
       const filename = appRoot + '/input.wav'
       // Listen for sound
       const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
