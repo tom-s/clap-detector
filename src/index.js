@@ -31,13 +31,10 @@ import first from 'lodash/first'
 import last from 'lodash/last'
 import omit from 'lodash/omit'
 import maxBy from 'lodash/maxBy'
-import isEmpty from 'lodash/isEmpty'
 import orderBy from 'lodash/orderBy'
 import uniqueId from 'lodash/uniqueId'
 import takeRight from 'lodash/takeRight'
-import assign from 'lodash/assign'
 import { exec } from 'child_process'
-import fs from 'fs'
 import appRoot from 'app-root-path'
 import os from 'os'
 
@@ -60,7 +57,9 @@ const parseOutput = body => {
   const split = new RegExp("^(.*):\\s*(.*)$", "mg")
   let match = ''
   let dict = {} //simple key:value
-  while(match = split.exec(body)) dict[match[1]] = parseFloat(match[2])
+  while((match = split.exec(body)) !== null) {
+    dict[match[1]] = parseFloat(match[2])
+  }
   return dict
 }
 
@@ -126,7 +125,7 @@ class ClapDetector {
 
   listen() {
     try {
-      const { MAX_HISTORY_LENGTH, AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
+      const { AUDIO_SOURCE, DETECTION_PERCENTAGE_START, DETECTION_PERCENTAGE_END } = this.config
       const filename = appRoot + '/input.wav'
       // Listen for sound
       const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
@@ -135,7 +134,6 @@ class ClapDetector {
       this.child = exec(cmd, (err) => {
         if (err) {
           throw err
-          return
         }
       })
 
