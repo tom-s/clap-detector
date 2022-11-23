@@ -132,7 +132,7 @@ class ClapDetector {
       const cmd = 'sox -t ' + AUDIO_SOURCE + ' ' + filename + ' silence 1 0.0001 '  + DETECTION_PERCENTAGE_START + ' 1 0.1 ' + DETECTION_PERCENTAGE_END + ' −−no−show−progress stat'
       let body  = ''
 
-      this.child = exec(cmd, (err) => {
+      this.child = exec(cmd, {maxBuffer: 1024 * 1024 * 10}, (err) => {
         if (err) {
           throw err
           return
